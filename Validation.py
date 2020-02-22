@@ -36,7 +36,7 @@ def read(file):
     return np.delete(name, 1, 1)  # node, jammed straight loc1, bending loc2, shear loc1, shear loc2
 
 def average(case):
-    a = case[:, 0]
+    a = case[:, 0] #lol
     b = []
     c = []
     for i in range(0, len(case)):
