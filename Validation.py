@@ -34,7 +34,7 @@ def read(file):
 
     name = np.array(name, dtype='O')  # jammed straight on spar
     return np.delete(name, 1, 1)  # node, jammed straight loc1, bending loc2, shear loc1, shear loc2
-
+#test
 def average(case):
     a = case[:, 0]
     b = []
