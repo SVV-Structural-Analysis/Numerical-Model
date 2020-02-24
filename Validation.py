@@ -2,7 +2,6 @@ from mpl_toolkits import mplot3d
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
@@ -27,7 +26,7 @@ elecord = np.array(a)
 # print(np.array(a).shape)
 
 # Access element number 4
-# print(b[0])
+
 #--------------------------------------------DEFINITIONS-------------------------------------------------------
 def read(file):
     name = np.genfromtxt(file, delimiter='')
@@ -49,15 +48,6 @@ def average(case):                          #average for bending and shear
     e = np.array(b)
     f = np.array(c)
     return np.column_stack((a, e, f))
-
-def avdef(case):                                #average for deflection
-    a = case[:,0]
-    b = []
-    for i in range(0, len(case)):
-        av = (case[i, 2] + case[i, 3] + case[i,4]) / 3
-        b.append(av)
-    e = np.array(b)
-    return np.column_stack((a, e))
 #--------------------------------------------CALCULATIONS-------------------------------------------------------------
 benskin = read('Bendingskin')
 jambenskin = read('Jambendingskin')
@@ -67,47 +57,55 @@ benskinav = average(benskin)       #element, average bending, average shear
 jambenskinav = average(jambenskin)
 jamstrskinav = average(jamstrskin)
 
-stcase1 = np.sort(benskinav,axis=0)       #stress and shear case 1 and elementnumbers and elements in right order
-stcase2 = np.sort(jambenskinav,axis=0)
-stcase3 = np.sort(jamstrskinav,axis=0)
+stcase1 = benskinav[benskinav[:,0].argsort()]      #stress and shear case 1 and elementnumbers and elements in right order
+stcase2 = jambenskinav[jambenskinav[:,0].argsort()]
+stcase3 = jamstrskinav[jamstrskinav[:,0].argsort()]
 
 avelcord = []
 for i in range(0,len(elecord)):
     elcord = np.mean(elecord[i], axis=0)
     avelcord.append(elcord)
 avelcord = np.array(avelcord)
-#--------------------------------------------PLOTTING Bending/Shear----------------------------------------------------
-# fig = plt.figure()
-# x = avelcord[:,0]
-# y = avelcord[:,1]
-# z = avelcord[:,2]
-# ax = plt.gca(projection='3d')
-# pl = ax.scatter(x,y,z, c=stcase2[:,1], cmap='hsv')
-# ax.set_xlabel('X-axis')
-# ax.set_ylabel('Y-axis')
-# ax.set_zlabel('Z-axis')
-# fig.colorbar(pl)
-# plt.show()
-#--------------------------------------------CALCULATIONS DEFLECTION----------------------------------------------------
-defl1 = readdef('Deflection1')
-defl2 = readdef('Deflection2')
-defl3 = readdef('Deflection3')
+# avelcord2 = []
+# for i in range(0,len(avelcord)):
+#     if avelcord[i,1] >= 0:
+#         avelcord2.append(avelcord[i,:])
+# avelcord2 = np.array(avelcord2)
 
-defl1av = avdef(defl1)    #node, average deflection
-defl2av = avdef(defl2)
-defl3av = avdef(defl3)
-nodesdef = np.array(nodes)
-#--------------------------------------------PLOTTING DEFLECTION----------------------------------------------------
+#--------------------------------------------PLOTTING Bending/Shear----------------------------------------------------
 fig = plt.figure()
-x = nodesdef[:,0]
-y = nodesdef[:,1]
-z = nodesdef[:,2]
+x = avelcord[:,0]
+y = avelcord[:,1]
+z = avelcord[:,2]
 ax = plt.gca(projection='3d')
-pl = ax.scatter(x,y,z, c=defl2av[:,1], cmap='hsv')
+pl = ax.scatter(x,y,z, c=stcase3[:,2], cmap='coolwarm')
 ax.set_xlabel('X-axis')
 ax.set_ylabel('Y-axis')
 ax.set_zlabel('Z-axis')
+ax.set_xlim3d(0,2500)
+ax.set_ylim3d(-1250,1250)
+ax.set_zlim3d(-1000,1000)
 fig.colorbar(pl)
 plt.show()
+#--------------------------------------------CALCULATIONS DEFLECTION----------------------------------------------------
+# defl1 = readdef('Deflection1')
+# defl2 = readdef('Deflection2')
+# defl3 = readdef('Deflection3')
+# nodesdef = np.array(nodes) #make array
+# #--------------------------------------------PLOTTING DEFLECTION----------------------------------------------------
+# fig = plt.figure()
+# x = nodesdef[:,0] + defl1[:,2]*10
+# y = nodesdef[:,1] + defl1[:,3]*10
+# z = nodesdef[:,2] + defl1[:,4]*10
+# ax = plt.gca(projection='3d')
+# pl = ax.scatter(x,y,z,c=defl1[:,1], cmap='coolwarm')
+# ax.set_xlabel('X-axis')
+# ax.set_ylabel('Y-axis')
+# ax.set_zlabel('Z-axis')
+# ax.set_xlim3d(0,2500)
+# ax.set_ylim3d(-1250,1250)
+# ax.set_zlim3d(-1250,1250)
+# fig.colorbar(pl)
+# plt.show()
 
 
