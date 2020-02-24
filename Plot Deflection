@@ -1,0 +1,28 @@
+# fig = plt.figure()
+# x = case1cord[:,0]
+# y = case1cord[:,1]
+# z = case1cord[:,2]
+# ax = plt.gca(projection='3d')
+# pl = ax.scatter(x,y,z, c=case1val[:,1])
+# ax.set_xlabel('X-axis')
+# ax.set_ylabel('Y-axis')
+# ax.set_zlabel('Z-axis')
+# fig.colorbar(pl)
+# plt.show()
+
+
+#
+# def compare(node, case):                    #comparison nodes with nodes deflection (NOT STRESS AND SHEAR)
+#     coord = []
+#     values = []
+#     for i in range(0,len(case)):
+#         for k in range(0,len(node)):
+#             if case[i,0] ==  node[k,0]:
+#                 coord.append([node[k,1],node[k,2], node[k,3]])
+#                 values.append([case[i,1],case[i,2]])
+#                 break
+#     a = np.array(coord)
+#     b = np.array(values)
+#     a = a.astype(np.float)
+#     return a,b
+

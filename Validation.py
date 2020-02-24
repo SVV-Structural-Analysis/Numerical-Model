@@ -1,41 +1,43 @@
 from mpl_toolkits import mplot3d
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
-def is_float(string):
-    """ True if given string is float else False"""
-    try:
-        return float(string)
-    except ValueError:
-        return False
+#--------------------------------------------COORDINATES CONNECT TO ELEMENTS--------------------------------------------
+nodes = pd.read_csv('B737.txt', delimiter=',',
+                    names = ['node_id', 'x', 'y', 'z'],
+                    index_col = 0)
+elements = pd.read_csv('Elements', delimiter=',',
+                       names = ['number', 'node1', 'node2', 'node3', 'node4'],
+                       index_col = 0)
 
-#--------------------------------------------COORDINATES-------------------------------------------------------
-nodes = []
-with open('B737.txt', 'r') as f:
-    d = f.readlines()
-    for i in d:
-        k = i.rstrip().split(",")
-        nodes.append([float(i) if is_float(i) else i for i in k])
+# Check dataframes
+# print(nodes.head())
+# print(elements.head())
 
-nodes = np.array(nodes, dtype='O') #node, x, y ,z
+# Couple
+node_defs = ['node1','node2','node3','node4']
+a = [np.array(nodes.loc[elements.loc[nr,node_defs]]) for nr in elements.index]
+elecord = np.array(a)
 
-# print(nodes[:,1]) #prints column 1(y) as a row
-# print(nodes[0,:]) #prints first row as a row
+# Check shape
+# print(np.array(a).shape)
 
+# Access element number 4
+# print(b[0])
 #--------------------------------------------DEFINITIONS-------------------------------------------------------
 def read(file):
-    name = []
-    with open(file, 'r') as f:
-        d = f.readlines()
-        for i in d:
-            k = i.rstrip().split()
-            name.append([float(i) if is_float(i) else i for i in k])
+    name = np.genfromtxt(file, delimiter='')
+    return np.delete(name,1,1)  # node, jammed straight loc1, bending loc2, shear loc1, shear loc2
 
-    name = np.array(name, dtype='O')  # jammed straight on spar
-    return np.delete(name, 1, 1)  # node, jammed straight loc1, bending loc2, shear loc1, shear loc2
-#test
-def average(case):
+def readdef(file):
+    name = np.genfromtxt(file, delimiter='')
+    return name
+
+def average(case):                          #average for bending and shear
     a = case[:, 0]
     b = []
     c = []
@@ -48,60 +50,64 @@ def average(case):
     f = np.array(c)
     return np.column_stack((a, e, f))
 
-def compare(node, case):
-    coord = []
-    values = []
-    for i in range(0,len(case)):
-        for k in range(0,len(node)):
-            if case[i,0] ==  node[k,0]:
-                coord.append([node[k,1],node[k,2], node[k,3]])
-                values.append([case[i,1],case[i,2]])
-                break
-    a = np.array(coord)
-    b = np.array(values)
-    a = a.astype(np.float)
-    return a,b
-
+def avdef(case):                                #average for deflection
+    a = case[:,0]
+    b = []
+    for i in range(0, len(case)):
+        av = (case[i, 2] + case[i, 3] + case[i,4]) / 3
+        b.append(av)
+    e = np.array(b)
+    return np.column_stack((a, e))
 #--------------------------------------------CALCULATIONS-------------------------------------------------------------
-
 benskin = read('Bendingskin')
-benspar = read('bendingspar')
 jambenskin = read('Jambendingskin')
-jambenspar = read('Jambendingspar')
 jamstrskin = read('Jamstraightskin')
-jamstrspar = read('Jamstraightspar')
 
-benskinav = average(benskin)
-bensparav = average(benspar)        #node, average bending, average shear
+benskinav = average(benskin)       #element, average bending, average shear
 jambenskinav = average(jambenskin)
-jambensparav = average(jambenspar)
 jamstrskinav = average(jamstrskin)
-jamstrsparav = average(jamstrspar)
 
-#--------------------------------------------PLOTTING----------------------------------------------------------------
+stcase1 = np.sort(benskinav,axis=0)       #stress and shear case 1 and elementnumbers and elements in right order
+stcase2 = np.sort(jambenskinav,axis=0)
+stcase3 = np.sort(jamstrskinav,axis=0)
 
-case1a = compare(nodes,benskinav)
-case1acord = case1a[0]
-case1aval = case1a[1]
+avelcord = []
+for i in range(0,len(elecord)):
+    elcord = np.mean(elecord[i], axis=0)
+    avelcord.append(elcord)
+avelcord = np.array(avelcord)
+#--------------------------------------------PLOTTING Bending/Shear----------------------------------------------------
+# fig = plt.figure()
+# x = avelcord[:,0]
+# y = avelcord[:,1]
+# z = avelcord[:,2]
+# ax = plt.gca(projection='3d')
+# pl = ax.scatter(x,y,z, c=stcase2[:,1], cmap='hsv')
+# ax.set_xlabel('X-axis')
+# ax.set_ylabel('Y-axis')
+# ax.set_zlabel('Z-axis')
+# fig.colorbar(pl)
+# plt.show()
+#--------------------------------------------CALCULATIONS DEFLECTION----------------------------------------------------
+defl1 = readdef('Deflection1')
+defl2 = readdef('Deflection2')
+defl3 = readdef('Deflection3')
 
-case1b = compare(nodes,bensparav)
-case1bcord = case1b[0]
-case1bval = case1b[1]
-
-case1cord = np.concatenate((case1acord,case1bcord))
-case1val = np.concatenate((case1aval,case1bval))
-
+defl1av = avdef(defl1)    #node, average deflection
+defl2av = avdef(defl2)
+defl3av = avdef(defl3)
+nodesdef = np.array(nodes)
+#--------------------------------------------PLOTTING DEFLECTION----------------------------------------------------
 fig = plt.figure()
-x = case1cord[:,0]
-y = case1cord[:,1]
-z = case1cord[:,2]
+x = nodesdef[:,0]
+y = nodesdef[:,1]
+z = nodesdef[:,2]
 ax = plt.gca(projection='3d')
-ax.scatter(x,y,z, c=case1val[:,0])
+pl = ax.scatter(x,y,z, c=defl2av[:,1], cmap='hsv')
 ax.set_xlabel('X-axis')
 ax.set_ylabel('Y-axis')
 ax.set_zlabel('Z-axis')
-
+fig.colorbar(pl)
 plt.show()
-
 
 
