@@ -26,3 +26,25 @@
 #     a = a.astype(np.float)
 #     return a,b
 
+#
+# fig = plt.figure()
+# x = nodesdef[:,0]
+# y = nodesdef[:,1]
+# z = nodesdef[:,2]
+# ax = plt.gca(projection='3d')
+# pl = ax.scatter(x,y,z, c=RF1[:,1], cmap='binary')
+# ax.set_xlabel('X-axis')
+# ax.set_ylabel('Y-axis')
+# ax.set_zlabel('Z-axis')
+# ax.set_xlim3d(0,2500)
+# ax.set_ylim3d(-500,500)   #-1250,1250
+# ax.set_zlim3d(-1000,1000) #-1250,1250
+# color = fig.colorbar(pl)
+# color.set_label('Von Mises Stress')
+# plt.show()
+
+# avelcord2 = []
+# for i in range(0,len(avelcord)):
+#     if avelcord[i,1] >= 0:
+#         avelcord2.append(avelcord[i,:])
+# avelcord2 = np.array(avelcord2)
